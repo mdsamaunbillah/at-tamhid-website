@@ -1,6 +1,6 @@
 "use client";
 import { useEffect, useState } from "react";
-import { supabase } from "../../lib/supabaseClient";
+import { supabase } from "../../../lib/supabaseClient";
 
 // Route: app/admin/payments/page.jsx
 // শুধু role = 'admin' হলে এই পেজ কাজ করবে
