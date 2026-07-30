@@ -29,8 +29,11 @@ export default function Home() {
             <span className="text-lg tracking-wide">معهد التمهيد</span>
           </div>
           <nav className="hidden md:flex items-center gap-8 text-sm">
-            <Link href="/" className="opacity-70 hover:opacity-100">الرئيسية</Link>
+            <Link href="/" className="opacity-100">الرئيسية</Link>
             <Link href="/courses" className="opacity-70 hover:opacity-100">الدورات</Link>
+            <Link href="/about" className="opacity-70 hover:opacity-100">من نحن</Link>
+            <Link href="/teachers" className="opacity-70 hover:opacity-100">المدرسون</Link>
+            <Link href="/contact" className="opacity-70 hover:opacity-100">تواصل معنا</Link>
           </nav>
           <div className="flex items-center gap-3">
             <Link href="/login" className="text-sm px-4 py-2 rounded-full font-semibold" style={{ background: "#C9A227", color: "#0A1628" }}>
