@@ -34,13 +34,7 @@ export default function ContactPage() {
         </p>
 
         <div className="grid md:grid-cols-2 gap-6">
-          
-            href="https://wa.me/8801886684922"
-            target="_blank"
-            rel="noreferrer"
-            className="flex items-center gap-4 p-6 rounded-2xl hover:opacity-90 transition"
-            style={{ background: "#F3ECD811", border: "1px solid #C9A22733" }}
-          >
+          <a href="https://wa.me/8801886684922" target="_blank" rel="noreferrer" className="flex items-center gap-4 p-6 rounded-2xl hover:opacity-90 transition" style={{ background: "#F3ECD811", border: "1px solid #C9A22733" }}>
             <div style={{ width: 46, height: 46, borderRadius: "50%", background: "#C9A22722" }} className="flex items-center justify-center shrink-0">
               <MessageCircle size={20} style={{ color: "#C9A227" }} />
             </div>
@@ -50,13 +44,7 @@ export default function ContactPage() {
             </div>
           </a>
 
-          
-            href="https://wa.me/8801822510180"
-            target="_blank"
-            rel="noreferrer"
-            className="flex items-center gap-4 p-6 rounded-2xl hover:opacity-90 transition"
-            style={{ background: "#F3ECD811", border: "1px solid #C9A22733" }}
-          >
+          <a href="https://wa.me/8801822510180" target="_blank" rel="noreferrer" className="flex items-center gap-4 p-6 rounded-2xl hover:opacity-90 transition" style={{ background: "#F3ECD811", border: "1px solid #C9A22733" }}>
             <div style={{ width: 46, height: 46, borderRadius: "50%", background: "#C9A22722" }} className="flex items-center justify-center shrink-0">
               <Phone size={20} style={{ color: "#C9A227" }} />
             </div>
@@ -66,10 +54,7 @@ export default function ContactPage() {
             </div>
           </a>
 
-          <div
-            className="flex items-center gap-4 p-6 rounded-2xl md:col-span-2"
-            style={{ background: "#F3ECD811", border: "1px solid #C9A22733" }}
-          >
+          <div className="flex items-center gap-4 p-6 rounded-2xl md:col-span-2" style={{ background: "#F3ECD811", border: "1px solid #C9A22733" }}>
             <div style={{ width: 46, height: 46, borderRadius: "50%", background: "#C9A22722" }} className="flex items-center justify-center shrink-0">
               <MapPin size={20} style={{ color: "#C9A227" }} />
             </div>
