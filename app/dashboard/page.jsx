@@ -1,6 +1,7 @@
 "use client";
 import { useEffect, useState } from "react";
 import { supabase } from "../../lib/supabaseClient";
+import Link from "next/link";
 import { issueCertificate } from "../../lib/certificate";
 
 export default function DashboardPage() {
@@ -74,7 +75,12 @@ export default function DashboardPage() {
 
   return (
     <div dir="rtl" style={{ maxWidth: 800, margin: "40px auto", fontFamily: "sans-serif" }}>
-      <h1>لوحة الطالب</h1>
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+  <h1>لوحة الطالب</h1>
+  <Link href="/dashboard/profile" style={{ fontSize: 14, color: "#C9A227" }}>
+    الملف الشخصي ⚙️
+  </Link>
+</div>
 
       <h2 style={{ marginTop: 32 }}>دوراتي</h2>
       {enrollments.length === 0 && <p>لم تسجل في أي دورة بعد.</p>}
