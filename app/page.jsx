@@ -8,6 +8,13 @@ import { supabase } from "../lib/supabaseClient";
 export default function Home() {
   const [courses, setCourses] = useState([]);
   const [filter, setFilter] = useState("all");
+  const [user, setUser] = useState(null);
+
+  useEffect(() => {
+    supabase.auth.getUser().then(({ data }) => {
+      setUser(data && data.user ? data.user : null);
+    });
+  }, []);
 
   useEffect(() => {
     async function fetchCourses() {
@@ -36,9 +43,15 @@ export default function Home() {
             <Link href="/contact" className="opacity-70 hover:opacity-100">تواصل معنا</Link>
           </nav>
           <div className="flex items-center gap-3">
-            <Link href="/login" className="text-sm px-4 py-2 rounded-full font-semibold" style={{ background: "#C9A227", color: "#0A1628" }}>
-              تسجيل الدخول
-            </Link>
+            {user ? (
+              <Link href="/dashboard" className="text-sm px-4 py-2 rounded-full font-semibold" style={{ background: "#C9A227", color: "#0A1628" }}>
+                لوحة التحكم
+              </Link>
+            ) : (
+              <Link href="/login" className="text-sm px-4 py-2 rounded-full font-semibold" style={{ background: "#C9A227", color: "#0A1628" }}>
+                تسجيل الدخول
+              </Link>
+            )}
           </div>
         </div>
       </header>
@@ -50,7 +63,6 @@ export default function Home() {
         </div>
         <h1 className="text-5xl md:text-7xl mb-2">التمهيد</h1>
         <p className="text-base md:text-lg opacity-60 mb-8">للترجمة القانونية والاستشارات القنصلية</p>
-
         <p className="text-2xl md:text-3xl leading-snug mb-6 max-w-2xl" style={{ color: "#C9A227" }}>
           باب العلم مفتوح، والسند موصول
         </p>
@@ -92,7 +104,6 @@ export default function Home() {
               ))}
             </div>
           </div>
-
           <div>
             {courses.map((c, idx) => (
               <div key={c.id} className="flex items-center gap-6 py-6 border-t last:border-b" style={{ borderColor: "#0A162822" }}>
