@@ -6,6 +6,7 @@ import { supabase } from "../../../lib/supabaseClient";
 export default function ProfilePage() {
   const [user, setUser] = useState(null);
   const [fullName, setFullName] = useState("");
+  const [englishName, setEnglishName] = useState("");
   const [phone, setPhone] = useState("");
   const [city, setCity] = useState("");
   const [loading, setLoading] = useState(true);
@@ -23,11 +24,12 @@ export default function ProfilePage() {
 
       const { data: profile } = await supabase
         .from("profiles")
-        .select("full_name, phone, city")
+        .select("full_name, english_name, phone, city")
         .eq("id", userData.user.id)
         .single();
 
       setFullName(profile?.full_name || "");
+      setEnglishName(profile?.english_name || "");
       setPhone(profile?.phone || "");
       setCity(profile?.city || "");
       setLoading(false);
@@ -42,7 +44,7 @@ export default function ProfilePage() {
 
     const { error } = await supabase
       .from("profiles")
-      .update({ full_name: fullName, phone, city })
+      .update({ full_name: fullName, english_name: englishName, phone, city })
       .eq("id", user.id);
 
     setSaving(false);
@@ -89,12 +91,23 @@ export default function ProfilePage() {
           </div>
 
           <div style={{ marginBottom: 14 }}>
-            <label style={{ fontSize: 14, opacity: 0.8 }}>الاسم الكامل</label>
+            <label style={{ fontSize: 14, opacity: 0.8 }}>الاسم الكامل (بالعربية)</label>
             <input
               type="text"
               value={fullName}
               onChange={(e) => setFullName(e.target.value)}
               required
+              style={{ width: "100%", padding: 10, marginTop: 6, borderRadius: 8, border: "1px solid #C9A22755", background: "#F3ECD811", color: "#F3ECD8" }}
+            />
+          </div>
+
+          <div style={{ marginBottom: 14 }}>
+            <label style={{ fontSize: 14, opacity: 0.8 }}>English Name (for certificate)</label>
+            <input
+              type="text"
+              value={englishName}
+              onChange={(e) => setEnglishName(e.target.value)}
+              placeholder="e.g. Muhammad Samau Billah"
               style={{ width: "100%", padding: 10, marginTop: 6, borderRadius: 8, border: "1px solid #C9A22755", background: "#F3ECD811", color: "#F3ECD8" }}
             />
           </div>
