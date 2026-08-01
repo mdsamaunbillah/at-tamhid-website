@@ -1,7 +1,8 @@
 "use client";
 import { useEffect, useState } from "react";
-import { supabase } from "../../lib/supabaseClient";
+import Image from "next/image";
 import Link from "next/link";
+import { supabase } from "../../lib/supabaseClient";
 import { issueCertificate } from "../../lib/certificate";
 
 export default function DashboardPage() {
@@ -36,7 +37,6 @@ export default function DashboardPage() {
     load();
   }, []);
 
-  // একটা লেসন "সম্পন্ন" মার্ক করা — সব লেসন শেষ হলে অটো সার্টিফিকেট ইস্যু হবে
   async function markLessonComplete(enrollment, lessonId, totalLessons) {
     const updatedLessons = Array.from(new Set([...(enrollment.completed_lessons || []), lessonId]));
     const progress = Math.round((updatedLessons.length / totalLessons) * 100);
@@ -52,12 +52,7 @@ export default function DashboardPage() {
       .eq("id", enrollment.id);
 
     if (isComplete && enrollment.courses.type === "free") {
-      const { data: profile } = await supabase
-        .from("profiles")
-        .select("full_name")
-        .eq("id", user.id)
-        .single();
-
+      const { data: profile } = await supabase.from("profiles").select("full_name").eq("id", user.id).single();
       await issueCertificate({
         userId: user.id,
         userName: profile?.full_name,
@@ -65,54 +60,106 @@ export default function DashboardPage() {
         courseTitle: enrollment.courses.title_ar,
       });
     }
-
-    // পেজ রিফ্রেশ করে নতুন ডেটা লোড করা
     window.location.reload();
   }
 
-  if (loading) return <p style={{ textAlign: "center", marginTop: 60 }}>جاري التحميل...</p>;
-  if (!user) return <p style={{ textAlign: "center", marginTop: 60 }}>يرجى تسجيل الدخول أولاً.</p>;
+  const statusLabel = (status) => {
+    if (status === "completed") return { text: "مكتملة ✅", color: "#3E5C4E" };
+    if (status === "pending_payment") return { text: "بانتظار الدفع ⏳", color: "#9A3324" };
+    return { text: "نشطة", color: "#C9A227" };
+  };
+
+  if (loading)
+    return (
+      <div dir="rtl" style={{ minHeight: "100vh", background: "#0A1628", color: "#F3ECD8", display: "flex", alignItems: "center", justifyContent: "center", fontFamily: "sans-serif" }}>
+        جاري التحميل...
+      </div>
+    );
+
+  if (!user)
+    return (
+      <div dir="rtl" style={{ minHeight: "100vh", background: "#0A1628", color: "#F3ECD8", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 16, fontFamily: "sans-serif" }}>
+        <p>يرجى تسجيل الدخول أولاً.</p>
+        <Link href="/login" style={{ color: "#C9A227", fontWeight: "bold" }}>
+          تسجيل الدخول
+        </Link>
+      </div>
+    );
 
   return (
-    <div dir="rtl" style={{ maxWidth: 800, margin: "40px auto", fontFamily: "sans-serif" }}>
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-  <h1>لوحة الطالب</h1>
-  <Link href="/dashboard/profile" style={{ fontSize: 14, color: "#C9A227" }}>
-    الملف الشخصي ⚙️
-  </Link>
-</div>
+    <div dir="rtl" style={{ minHeight: "100vh", background: "#0A1628", color: "#F3ECD8", fontFamily: "sans-serif" }}>
+      <header style={{ borderBottom: "1px solid #C9A22733" }}>
+        <div style={{ maxWidth: 900, margin: "0 auto", padding: "20px 24px", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+          <Link href="/" style={{ display: "flex", alignItems: "center", gap: 12, textDecoration: "none", color: "#F3ECD8" }}>
+            <Image src="/logo.jpg" alt="At Tamhid Institute" width={36} height={36} style={{ borderRadius: 8 }} />
+            <span style={{ fontSize: 16 }}>معهد التمهيد</span>
+          </Link>
+          <Link href="/dashboard/profile" style={{ fontSize: 14, color: "#C9A227", textDecoration: "none" }}>
+            الملف الشخصي ⚙️
+          </Link>
+        </div>
+      </header>
 
-      <h2 style={{ marginTop: 32 }}>دوراتي</h2>
-      {enrollments.length === 0 && <p>لم تسجل في أي دورة بعد.</p>}
-      {enrollments.map((e) => (
-        <div key={e.id} style={{ border: "1px solid #ddd", borderRadius: 12, padding: 16, marginBottom: 12 }}>
-          <h3>{e.courses?.title_ar}</h3>
-          <p>الحالة: {e.status === "completed" ? "مكتملة ✅" : e.status === "pending_payment" ? "بانتظار الدفع ⏳" : "نشطة"}</p>
-          <div style={{ background: "#eee", borderRadius: 8, height: 8, marginTop: 8 }}>
+      <div style={{ maxWidth: 900, margin: "0 auto", padding: "50px 24px" }}>
+        <div style={{ fontSize: 12, letterSpacing: 2, textTransform: "uppercase", color: "#9A3324", marginBottom: 8 }}>
+          لوحة التحكم
+        </div>
+        <h1 style={{ fontSize: 30, marginBottom: 40 }}>دوراتي</h1>
+
+        {enrollments.length === 0 && (
+          <p style={{ opacity: 0.6, marginBottom: 40 }}>لم تسجل في أي دورة بعد.</p>
+        )}
+
+        <div style={{ display: "grid", gap: 16, marginBottom: 50 }}>
+          {enrollments.map((e) => {
+            const s = statusLabel(e.status);
+            return (
+              <div
+                key={e.id}
+                style={{ background: "#F3ECD811", border: "1px solid #C9A22733", borderRadius: 16, padding: 20 }}
+              >
+                <h3 style={{ fontSize: 18, marginBottom: 6 }}>{e.courses?.title_ar}</h3>
+                <p style={{ fontSize: 13, color: s.color, marginBottom: 12 }}>الحالة: {s.text}</p>
+                <div style={{ background: "#F3ECD822", borderRadius: 20, height: 8 }}>
+                  <div
+                    style={{
+                      width: `${e.progress || 0}%`,
+                      background: "#C9A227",
+                      height: 8,
+                      borderRadius: 20,
+                    }}
+                  />
+                </div>
+                <p style={{ fontSize: 12, opacity: 0.6, marginTop: 8 }}>{e.progress || 0}% مكتمل</p>
+              </div>
+            );
+          })}
+        </div>
+
+        <h2 style={{ fontSize: 22, marginBottom: 20 }}>شهاداتي</h2>
+        {certificates.length === 0 && <p style={{ opacity: 0.6 }}>لا توجد شهادات بعد.</p>}
+        <div style={{ display: "grid", gap: 16 }}>
+          {certificates.map((c) => (
             <div
-              style={{
-                width: `${e.progress || 0}%`,
-                background: "#B8912F",
-                height: 8,
-                borderRadius: 8,
-              }}
-            />
-          </div>
-          <p style={{ fontSize: 12, opacity: 0.6 }}>{e.progress || 0}% مكتمل</p>
+              key={c.id}
+              style={{ background: "#F3ECD811", border: "1px solid #C9A22733", borderRadius: 16, padding: 20, display: "flex", justifyContent: "space-between", alignItems: "center" }}
+            >
+              <div>
+                <p style={{ marginBottom: 4 }}>{c.courses?.title_ar}</p>
+                <p style={{ fontSize: 12, opacity: 0.6 }}>رقم الشهادة: {c.certificate_number}</p>
+              </div>
+              
+                href={c.pdf_url}
+                target="_blank"
+                rel="noreferrer"
+                style={{ fontSize: 13, padding: "8px 18px", borderRadius: 20, background: "#C9A227", color: "#0A1628", fontWeight: "bold", textDecoration: "none" }}
+              >
+                تحميل PDF
+              </a>
+            </div>
+          ))}
         </div>
-      ))}
-
-      <h2 style={{ marginTop: 32 }}>شهاداتي</h2>
-      {certificates.length === 0 && <p>لا توجد شهادات بعد.</p>}
-      {certificates.map((c) => (
-        <div key={c.id} style={{ border: "1px solid #ddd", borderRadius: 12, padding: 16, marginBottom: 12 }}>
-          <p>{c.courses?.title_ar}</p>
-          <p style={{ fontSize: 12, opacity: 0.6 }}>رقم الشهادة: {c.certificate_number}</p>
-          <a href={c.pdf_url} target="_blank" rel="noreferrer">
-            تحميل الشهادة (PDF)
-          </a>
-        </div>
-      ))}
+      </div>
     </div>
   );
 }
