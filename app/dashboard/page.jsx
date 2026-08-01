@@ -46,16 +46,16 @@ export default function DashboardPage() {
       .from("enrollments")
       .update({
         completed_lessons: updatedLessons,
-        progress,
+        progress: progress,
         status: isComplete ? "completed" : "active",
       })
       .eq("id", enrollment.id);
 
     if (isComplete && enrollment.courses.type === "free") {
-      const { data: profile } = await supabase.from("profiles").select("full_name").eq("id", user.id).single();
+      const profileResult = await supabase.from("profiles").select("full_name").eq("id", user.id).single();
       await issueCertificate({
         userId: user.id,
-        userName: profile?.full_name,
+        userName: profileResult.data ? profileResult.data.full_name : "",
         courseId: enrollment.course_id,
         courseTitle: enrollment.courses.title_ar,
       });
@@ -63,20 +63,25 @@ export default function DashboardPage() {
     window.location.reload();
   }
 
-  const statusLabel = (status) => {
-    if (status === "completed") return { text: "مكتملة ✅", color: "#3E5C4E" };
-    if (status === "pending_payment") return { text: "بانتظار الدفع ⏳", color: "#9A3324" };
+  function statusLabel(status) {
+    if (status === "completed") {
+      return { text: "مكتملة ✅", color: "#3E5C4E" };
+    }
+    if (status === "pending_payment") {
+      return { text: "بانتظار الدفع ⏳", color: "#9A3324" };
+    }
     return { text: "نشطة", color: "#C9A227" };
-  };
+  }
 
-  if (loading)
+  if (loading) {
     return (
       <div dir="rtl" style={{ minHeight: "100vh", background: "#0A1628", color: "#F3ECD8", display: "flex", alignItems: "center", justifyContent: "center", fontFamily: "sans-serif" }}>
         جاري التحميل...
       </div>
     );
+  }
 
-  if (!user)
+  if (!user) {
     return (
       <div dir="rtl" style={{ minHeight: "100vh", background: "#0A1628", color: "#F3ECD8", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 16, fontFamily: "sans-serif" }}>
         <p>يرجى تسجيل الدخول أولاً.</p>
@@ -85,6 +90,7 @@ export default function DashboardPage() {
         </Link>
       </div>
     );
+  }
 
   return (
     <div dir="rtl" style={{ minHeight: "100vh", background: "#0A1628", color: "#F3ECD8", fontFamily: "sans-serif" }}>
@@ -95,7 +101,7 @@ export default function DashboardPage() {
             <span style={{ fontSize: 16 }}>معهد التمهيد</span>
           </Link>
           <Link href="/dashboard/profile" style={{ fontSize: 14, color: "#C9A227", textDecoration: "none" }}>
-            الملف الشخصي ⚙️
+            الملف الشخصي
           </Link>
         </div>
       </header>
@@ -106,29 +112,17 @@ export default function DashboardPage() {
         </div>
         <h1 style={{ fontSize: 30, marginBottom: 40 }}>دوراتي</h1>
 
-        {enrollments.length === 0 && (
-          <p style={{ opacity: 0.6, marginBottom: 40 }}>لم تسجل في أي دورة بعد.</p>
-        )}
+        {enrollments.length === 0 ? <p style={{ opacity: 0.6, marginBottom: 40 }}>لم تسجل في أي دورة بعد.</p> : null}
 
         <div style={{ display: "grid", gap: 16, marginBottom: 50 }}>
-          {enrollments.map((e) => {
+          {enrollments.map(function (e) {
             const s = statusLabel(e.status);
             return (
-              <div
-                key={e.id}
-                style={{ background: "#F3ECD811", border: "1px solid #C9A22733", borderRadius: 16, padding: 20 }}
-              >
-                <h3 style={{ fontSize: 18, marginBottom: 6 }}>{e.courses?.title_ar}</h3>
+              <div key={e.id} style={{ background: "#F3ECD811", border: "1px solid #C9A22733", borderRadius: 16, padding: 20 }}>
+                <h3 style={{ fontSize: 18, marginBottom: 6 }}>{e.courses ? e.courses.title_ar : ""}</h3>
                 <p style={{ fontSize: 13, color: s.color, marginBottom: 12 }}>الحالة: {s.text}</p>
                 <div style={{ background: "#F3ECD822", borderRadius: 20, height: 8 }}>
-                  <div
-                    style={{
-                      width: `${e.progress || 0}%`,
-                      background: "#C9A227",
-                      height: 8,
-                      borderRadius: 20,
-                    }}
-                  />
+                  <div style={{ width: (e.progress || 0) + "%", background: "#C9A227", height: 8, borderRadius: 20 }} />
                 </div>
                 <p style={{ fontSize: 12, opacity: 0.6, marginTop: 8 }}>{e.progress || 0}% مكتمل</p>
               </div>
@@ -137,27 +131,21 @@ export default function DashboardPage() {
         </div>
 
         <h2 style={{ fontSize: 22, marginBottom: 20 }}>شهاداتي</h2>
-        {certificates.length === 0 && <p style={{ opacity: 0.6 }}>لا توجد شهادات بعد.</p>}
+        {certificates.length === 0 ? <p style={{ opacity: 0.6 }}>لا توجد شهادات بعد.</p> : null}
         <div style={{ display: "grid", gap: 16 }}>
-          {certificates.map((c) => (
-            <div
-              key={c.id}
-              style={{ background: "#F3ECD811", border: "1px solid #C9A22733", borderRadius: 16, padding: 20, display: "flex", justifyContent: "space-between", alignItems: "center" }}
-            >
-              <div>
-                <p style={{ marginBottom: 4 }}>{c.courses?.title_ar}</p>
-                <p style={{ fontSize: 12, opacity: 0.6 }}>رقم الشهادة: {c.certificate_number}</p>
+          {certificates.map(function (c) {
+            return (
+              <div key={c.id} style={{ background: "#F3ECD811", border: "1px solid #C9A22733", borderRadius: 16, padding: 20, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                <div>
+                  <p style={{ marginBottom: 4 }}>{c.courses ? c.courses.title_ar : ""}</p>
+                  <p style={{ fontSize: 12, opacity: 0.6 }}>رقم الشهادة: {c.certificate_number}</p>
+                </div>
+                <a href={c.pdf_url} target="_blank" rel="noreferrer" style={{ fontSize: 13, padding: "8px 18px", borderRadius: 20, background: "#C9A227", color: "#0A1628", fontWeight: "bold", textDecoration: "none" }}>
+                  تحميل PDF
+                </a>
               </div>
-              
-                href={c.pdf_url}
-                target="_blank"
-                rel="noreferrer"
-                style={{ fontSize: 13, padding: "8px 18px", borderRadius: 20, background: "#C9A227", color: "#0A1628", fontWeight: "bold", textDecoration: "none" }}
-              >
-                تحميل PDF
-              </a>
-            </div>
-          ))}
+            );
+          })}
         </div>
       </div>
     </div>
