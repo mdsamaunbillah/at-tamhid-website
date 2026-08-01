@@ -52,12 +52,15 @@ export default function DashboardPage() {
       .eq("id", enrollment.id);
 
     if (isComplete && enrollment.courses.type === "free") {
-      const profileResult = await supabase.from("profiles").select("full_name").eq("id", user.id).single();
+      const profileResult = await supabase.from("profiles").select("full_name, english_name").eq("id", user.id).single();
       await issueCertificate({
         userId: user.id,
         userName: profileResult.data ? profileResult.data.full_name : "",
+        englishName: profileResult.data ? profileResult.data.english_name : "",
         courseId: enrollment.course_id,
         courseTitle: enrollment.courses.title_ar,
+        durationAr: enrollment.courses.duration_ar,
+        durationEn: enrollment.courses.duration_en,
       });
     }
     window.location.reload();
